@@ -153,7 +153,7 @@ return (
 								            <tbody>
 								             {orders.map((order) => (
 								            	<tr key={order.id} >
-									              <td><Link to ="/my-orders/{order.id}">{order.id}</Link></td>
+									              <td><Link to ={`/my-orders/${order.id}`}>{order.id}</Link></td>
 									              <td> <ul >
 											            {order.items.map((item) => (
 											              <li key={item.id} className="py-2 flex justify-between">

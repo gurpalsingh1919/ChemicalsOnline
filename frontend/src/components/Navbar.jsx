@@ -152,7 +152,7 @@ const Nav = () => {
                   <Link to="#" className="nav-link">SUPPORT</Link>
                   <span className="icon"><i className="fa-solid fa-chevron-down dropdown-icon"></i></span>
                   <ul className="subMenu">
-                    <li><Link to="/product-documentation">Product Documentation</Link></li>
+                    <li><Link to="/pages/product-documentation">Product Documentation</Link></li>
                     <li><Link to="/faqs">FAQ'S</Link></li>
                     {/*<li><Link to="#">Terms & Conditions</Link></li>*/}
                     <li><Link to="/contact-us">Contact Us</Link></li>

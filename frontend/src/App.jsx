@@ -69,7 +69,7 @@ function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/my-account" element={<MyAccount />} />
-          <Route path="/order-detail" element={<OrderDetail />} />
+          <Route path="/my-orders/:id" element={<OrderDetail />} />
           <Route path="/shopping-cart" element={<ShoppingCart />} />
           <Route path="/checkout" element={<Checkout />} />
           <Route path="/search" element={<Search />} />
