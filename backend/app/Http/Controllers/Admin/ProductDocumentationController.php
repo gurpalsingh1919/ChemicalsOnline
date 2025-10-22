@@ -12,7 +12,7 @@ class ProductDocumentationController extends Controller
 {
     public function index()
     {
-        $docs = ProductDocumentation::with('supportingDocuments')->paginate(10);
+        $docs = ProductDocumentation::with('supportingDocuments')->get();
         return view('admin.docs.index', compact('docs'));
     }
      public function alphabetical()
