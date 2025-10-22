@@ -56,54 +56,54 @@
 
                   {{-- Code --}}
                   <div class="col-lg-6 mb-2">
-                    <h5>Code <span class="text-danger">*</span></h5>
+                    <h5>Code</h5>
                     <input type="text" name="code" class="form-control" value="{{ old('code', $doc->code) }}">
                     @error('code') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
                   </div>
 
                   {{-- Category --}}
                   <div class="col-lg-6 mb-2">
-                    <h5>Category <span class="text-danger">*</span></h5>
+                    <h5>Category </h5>
                     <input type="text" name="category" class="form-control" value="{{ old('category', $doc->category) }}">
                     @error('category') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
                   </div>
 
                   {{-- Attributes --}}
                   <div class="col-lg-6 mb-2">
-                    <h5>Attributes <span class="text-danger">*</span></h5>
+                    <h5>Attributes </h5>
                     <input type="text" name="attributes" class="form-control" value="{{ old('attributes',$doc->attributes) }}">
                     @error('attributes') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
                   </div>
 
                   {{-- Packaging --}}
                   <div class="col-lg-6 mb-2">
-                    <h5>Packaging <span class="text-danger">*</span></h5>
+                    <h5>Packaging </h5>
                     <input type="text" name="packaging" class="form-control" value="{{ old('packaging', $doc->packaging) }}">
                     @error('packaging') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
                   </div>
 
                   {{-- Grades --}}
                   <div class="col-lg-6 mb-2">
-                    <h5>Grades <span class="text-danger">*</span></h5>
+                    <h5>Grades</h5>
                     <input type="text" name="grades" class="form-control" value="{{ old('grades', $doc->grades) }}">
                     @error('grades') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
                   </div>
                   {{-- Proof strength --}}
                   <div class="col-lg-6 mb-2">
-                    <h5>Proof Strength <span class="text-danger">*</span></h5>
+                    <h5>Proof Strength </h5>
                     <input type="text" name="grades" class="form-control" value="{{ old('proof_strength', $doc->proof_strength) }}">
                     @error('proof_strength') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
                   </div>
                   {{-- formula --}}
                   <div class="col-lg-6 mb-2">
-                    <h5>Formula <span class="text-danger">*</span></h5>
+                    <h5>Formula </h5>
                     <input type="text" name="formula" class="form-control" value="{{ old('formula', $doc->formula) }}">
                     @error('formula') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
                   </div>
 
                   {{-- Certification --}}
                   <div class="col-lg-6 mb-2">
-                    <h5>Certification <span class="text-danger">*</span></h5>
+                    <h5>Certification </h5>
                     @if($doc->certification)
                       <img src="{{ asset('storage/' . $doc->certification) }}" width="100" class="mb-2">
                     @endif
@@ -113,7 +113,7 @@
 
                   {{-- Image --}}
                   <div class="col-lg-6 mb-2">
-                    <h5>Image <span class="text-danger">*</span></h5>
+                    <h5>Image </h5>
                     @if($doc->image)
                       <img src="{{ asset('storage/' . $doc->image) }}" width="100" class="mb-2">
                     @endif
@@ -123,14 +123,14 @@
 
                   {{-- Notes --}}
                   <div class="col-lg-12 mb-2">
-                    <h5>Notes <span class="text-danger">*</span></h5>
+                    <h5>Notes </h5>
                     <textarea name="notes" class="form-control">{{ old('notes', $doc->notes) }}</textarea>
                     @error('notes') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
                   </div>
 
                   {{-- Supporting Documents --}}
                   <div class="col-lg-12 mb-2">
-                    <h5>Supporting Documents <span class="text-danger">*</span></h5>
+                    <h5>Supporting Documents</h5>
                     <div id="document-wrapper">
                       @foreach($doc->supportingDocuments as $index => $support)
 

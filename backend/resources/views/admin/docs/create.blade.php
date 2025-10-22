@@ -61,7 +61,7 @@
 
                         {{-- Code --}}
                         <div class="col-lg-6 mb-2">
-                          <h5>Code <span class="text-danger">*</span></h5>
+                          <h5>Code </h5>
                           <input type="text" name="code" class="form-control" placeholder="Code" value="{{ old('code') }}">
                           @if ($errors->has('code'))
                             <span class="invalid-feedback"><strong>{{ $errors->first('code') }}</strong></span>
@@ -70,7 +70,7 @@
 
                         {{-- Category --}}
                         <div class="col-lg-6 mb-2">
-                          <h5>Category <span class="text-danger">*</span></h5>
+                          <h5>Category </h5>
                           <input type="text" name="category" class="form-control" placeholder="Category" value="{{ old('category') }}">
                           @if ($errors->has('category'))
                             <span class="invalid-feedback"><strong>{{ $errors->first('category') }}</strong></span>
