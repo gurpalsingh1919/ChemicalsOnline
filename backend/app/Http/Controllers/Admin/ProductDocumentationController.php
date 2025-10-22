@@ -50,8 +50,8 @@ class ProductDocumentationController extends Controller
     {
         $request->validate([
         'name' => ['required', 'string', 'max:255'],
-        'code' => ['required', 'string', 'max:100'],
-        'category' => ['required', 'string', 'max:100'],
+        //'code' => ['required', 'string', 'max:100'],
+        //'category' => ['required', 'string', 'max:100'],
         'attributes' => ['nullable', 'string'],
         'packaging' => ['nullable', 'string'],
         'grades' => ['nullable', 'string'],
@@ -113,8 +113,8 @@ class ProductDocumentationController extends Controller
 
         $request->validate([
         'name' => ['required', 'string', 'max:255'],
-        'code' => ['required', 'string', 'max:100'],
-        'category' => ['required', 'string', 'max:100'],
+        //'code' => ['required', 'string', 'max:100'],
+        //'category' => ['required', 'string', 'max:100'],
         'attributes' => ['nullable', 'string'],
         'packaging' => ['nullable', 'string'],
         'grades' => ['nullable', 'string'],
