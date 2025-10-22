@@ -324,7 +324,12 @@ class ApiController extends Controller
         return response()->json(['message' => 'Your request has been submitted successfully!']);
     }
 
+    public function orderDetail($id)
+    {
+        $order = Order::with(['items.product.image'])->findOrFail($id);
 
+        return response()->json($order);
+    }
 
 
 
