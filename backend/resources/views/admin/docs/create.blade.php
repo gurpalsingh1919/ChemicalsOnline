@@ -103,6 +103,23 @@
                             <span class="invalid-feedback"><strong>{{ $errors->first('grades') }}</strong></span>
                           @endif
                         </div>
+                        {{-- Proof Strength --}}
+                        <div class="col-lg-6 mb-2">
+                          <h5>Proof Strength </h5>
+                          <input type="text" name="proof_strength" class="form-control" placeholder="Proof Strength" value="{{ old('proof_strength') }}">
+                          @if ($errors->has('proof_strength'))
+                            <span class="invalid-feedback"><strong>{{ $errors->first('proof_strength') }}</strong></span>
+                          @endif
+                        </div>
+
+                        {{-- Formula --}}
+                        <div class="col-lg-6 mb-2">
+                          <h5>Formula </h5>
+                          <input type="text" name="formula" class="form-control" placeholder="Formula" value="{{ old('formula') }}">
+                          @if ($errors->has('formula'))
+                            <span class="invalid-feedback"><strong>{{ $errors->first('formula') }}</strong></span>
+                          @endif
+                        </div>
 
                         {{-- Certification (Image Upload) --}}
                         <div class="col-lg-6 mb-2">

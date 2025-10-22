@@ -88,6 +88,18 @@
                     <input type="text" name="grades" class="form-control" value="{{ old('grades', $doc->grades) }}">
                     @error('grades') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
                   </div>
+                  {{-- Proof strength --}}
+                  <div class="col-lg-6 mb-2">
+                    <h5>Proof Strength <span class="text-danger">*</span></h5>
+                    <input type="text" name="grades" class="form-control" value="{{ old('proof_strength', $doc->proof_strength) }}">
+                    @error('proof_strength') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
+                  </div>
+                  {{-- formula --}}
+                  <div class="col-lg-6 mb-2">
+                    <h5>Formula <span class="text-danger">*</span></h5>
+                    <input type="text" name="formula" class="form-control" value="{{ old('formula', $doc->formula) }}">
+                    @error('formula') <span class="invalid-feedback d-block">{{ $message }}</span> @enderror
+                  </div>
 
                   {{-- Certification --}}
                   <div class="col-lg-6 mb-2">
