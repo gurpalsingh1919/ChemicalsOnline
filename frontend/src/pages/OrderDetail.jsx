@@ -1,6 +1,7 @@
 // src/pages/OrderDetail.jsx
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
+import { useAuth } from "../utils/AuthContext";
 import axiosInstance from "../axios";
 
 export default function OrderDetail() {
@@ -8,11 +9,12 @@ export default function OrderDetail() {
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-
+  const { user } = useAuth();
   useEffect(() => {
     const fetchOrder = async () => {
       try {
         const response = await axiosInstance.get(`/api/my-orders/${id}`);
+        console.log(response)
         setOrder(response.data);
       } catch (err) {
         setError("Unable to fetch order details.");
@@ -59,16 +61,24 @@ export default function OrderDetail() {
                   </div>
                   <div className="col-md-6 mb-2">
                     <strong>Total Cost:</strong>
-                    <span className="ms-2">${order.total_amount}</span>
+                    <span className="ms-2">${order.amount}</span>
                   </div>
                   <div className="col-md-6 mb-2">
                     <strong>Status:</strong>
-                    <span className="ms-2">{order.status}</span>
+                    <span className="ms-2">{order.status = 0 ? (
+															        <span>Pending</span>
+															      ) : order.status = 1 ? (
+															        <span>Success</span>
+															      ): order.status = 2 ? (
+															        <span>Fail</span>
+															      ) : (
+															        <span>Cancel</span>
+															      )}</span>
                   </div>
-                  <div className="col-md-12 mb-2">
+                  {/*<div className="col-md-12 mb-2">
                     <strong>Shipping Address:</strong>
                     <span className="ms-2">{order.shipping_address}</span>
-                  </div>
+                  </div>*/}
                 </div>
               </div>
             </div>
@@ -85,15 +95,15 @@ export default function OrderDetail() {
                             <div className="productImage">
                               <img
                                 src={
-                                  item.product?.image?.url ||
-                                  "/images/placeholder.png"
+                                  item.product.image_url ||
+                                  "/images//no-image.jpg"
                                 }
-                                alt={item.product?.name}
+                               
                                 className="imgResponsive"
                               />
                             </div>
                             <Link
-                              to={`/product/${item.product?.slug}`}
+                              to={`/products/${item.product?.slug}`}
                               className="productName ms-2"
                             >
                               {item.product?.name}
@@ -103,11 +113,16 @@ export default function OrderDetail() {
                         <div className="col-md-4 col-sm-4">
                           <div className="d-flex justify-content-between">
                             <div className="productQuantity">
-                              {item.quantity}
+                              {item.qty}
                             </div>
                             <div className="productPriceOuter d-flex">
                               <div className="productPrice">
-                                ${item.price}
+                                ${parseFloat(item.price).toFixed(2)}
+                              </div>
+                            </div>
+                            <div className="productPriceOuter d-flex">
+                              <div className="productPrice">
+                                ${parseFloat(item.price * item.qty).toFixed(2)}
                               </div>
                             </div>
                           </div>
@@ -120,7 +135,7 @@ export default function OrderDetail() {
                     <div className="row">
                       <div className="col-md-12 text-end">
                         <div className="totalPrice mb-2">
-                          Subtotal <span>${order.total_amount}</span>
+                          Subtotal <span>${order.amount}</span>
                         </div>
                       </div>
                     </div>
