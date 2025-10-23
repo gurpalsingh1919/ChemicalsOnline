@@ -148,7 +148,7 @@ class ProductController extends Controller
         $product = Product::findOrFail($id);
         $product->delete();
 
-        return redirect()->route('admin.all-products')->with('success', 'Product deleted successfully!');
+        return redirect()->route('admin.all_products')->with('success', 'Product deleted successfully!');
     }
 
      public function showImportForm()

@@ -53,10 +53,22 @@ useEffect(() => {
                     <td>PACKAGING</td>
                     <td>{product.packaging}</td>
                   </tr>
+                   {product.formula && (
+                  <tr>
+                    <td>FORMULA</td>
+                    <td>{product.formula}</td>
+                  </tr> )}
+                   {product.proof_strength && (
+                  <tr>
+                    <td>PROOF/STRENGTH</td>
+                    <td>{product.proof_strength}</td>
+                  </tr> )}
+                  {product.grades && (
                   <tr>
                     <td>GRADES</td>
                     <td>{product.grades}</td>
                   </tr>
+                   )}
                 </tbody>
               </table>
 
