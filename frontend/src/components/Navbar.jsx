@@ -126,7 +126,7 @@ const Nav = () => {
                   <Link to="#" className="nav-link">SHOP BY INDUSTRY</Link>
                   <span className="icon"><i className="fa-solid fa-chevron-down dropdown-icon"></i></span>
                   <ul className="subMenu">
-                   {/* <li><Link to={`/collections/small-molecule-pharma`}>SMALL MOLECULE PHARMA</Link></li>
+                    <li><Link to={`/collections/small-molecule-pharma`}>SMALL MOLECULE PHARMA</Link></li>
                     <li><Link to={`/collections/large-molecule-pharmabioprocessing`}>LARGE MOLECULE PHARMA/BIOPROCESSING</Link></li>
                     <li><Link to={`/collections/labs`}>LABS</Link></li>
                     <li><Link to={`/collections/beverage`}>BEVERAGE</Link></li>
@@ -135,8 +135,8 @@ const Nav = () => {
                     <li><Link to={`/collections/herbal-extraction`}>HERBAL EXTRACTION</Link></li>
                     <li><Link to={`/collections/medical-device`}>MEDICAL DEVICE</Link></li>
                     <li><Link to={`/collections/nutraceutical`}>NUTRACEUTICAL</Link></li>
-                    <li><Link to={`/collections/foodflavorfragrance`}>FOOD/FLAVOR/FRAGRANCE</Link></li>*/}
-                   <li><Link to={`/collections/glycerin`}>SMALL MOLECULE PHARMA</Link></li>
+                    <li><Link to={`/collections/foodflavorfragrance`}>FOOD/FLAVOR/FRAGRANCE</Link></li>
+                   {/*<li><Link to={`/collections/glycerin`}>SMALL MOLECULE PHARMA</Link></li>
                     <li><Link to={`/collections/surfactants`}>LARGE MOLECULE PHARMA/BIOPROCESSING</Link></li>
                     <li><Link to={`/collections/non-gmo-alcohol`}>LABS</Link></li>
                     <li><Link to={`/collections/water-treatment`}>BEVERAGE</Link></li>
@@ -145,7 +145,7 @@ const Nav = () => {
                     <li><Link to={`/collections/tax-free-ethanol`}>HERBAL EXTRACTION</Link></li>
                     <li><Link to={`/collections/cosmetic-compounds`}>MEDICAL DEVICE</Link></li>
                     <li><Link to={`/collections/silicones`}>NUTRACEUTICAL</Link></li>
-                    <li><Link to={`/collections/solvents`}>FOOD/FLAVOR/FRAGRANCE</Link></li>
+                    <li><Link to={`/collections/solvents`}>FOOD/FLAVOR/FRAGRANCE</Link></li>*/}
                   </ul>
                 </li>
                 <li className="nav-item dropdown">

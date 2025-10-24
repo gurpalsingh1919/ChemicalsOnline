@@ -29,47 +29,6 @@ class ApiController extends Controller
     public function byCategory(Request $request, $slug=null, $subcategorySlug = null)
     { 
 
-      /*if($slug == 'small-molecule-pharma')
-      {
-        $categoryIds=['181','191','212'];
-      }
-      else if($slug == 'large-molecule-pharmabioprocessing')
-      {
-        $categoryIds=['181','191','212','276','264'];
-      }
-      else if($slug == 'labs')
-      {
-        $categoryIds=['181','191','212','276','264'];
-      }
-      else if($slug == 'beverage')
-      {
-        $categoryIds=['181','191','212','276','264'];
-      }
-      else if($slug == 'industrial')
-      {
-        $categoryIds=['181','191','212','276','264'];
-      }
-      else if($slug == 'personal-carecosmetics')
-      {
-        $categoryIds=['181','191','212','276','264'];
-      }
-      else if($slug == 'herbal-extraction')
-      {
-        $categoryIds=['181','191','212','276','264'];
-      }
-      else if($slug == 'medical-device')
-      {
-        $categoryIds=['181','191','212','276','264'];
-      }
-      else if($slug == 'nutraceutical')
-      {
-        $categoryIds=['181','191','206','162','264'];
-      }
-      else if($slug == 'foodflavorfragrance')
-      {
-        $categoryIds=['151','162','84','197','206'];
-      }*/
-
       if (!$slug) 
       {
         $query = Product::with('image');
@@ -81,19 +40,113 @@ class ApiController extends Controller
           // Subcategory route → only subcategory products
           $subcategory = Category::where('slug', $subcategorySlug)
               ->whereHas('parent', function ($q) use ($slug) {
-                  $q->where('slug', $slug);
+                  $q->where('slug', $slug)->orWhere('industry',$slug);
               })->firstOrFail();
-
+              //echo "<pre>";print_r($subcategory);die;
           $categoryIds = [$subcategory->id];
           $query = Product::with('image')
           ->whereHas('categories', function ($q) use ($categoryIds) {
               $q->whereIn('categories.id', $categoryIds);
           });
 
-          $category = Category::with('subcategories')
-              ->where(['slug'=>$slug,'parent_id'=>'0'])->firstOrFail();
-          $sub_categories=$category->subcategories;
+          $category = Category::with('subcategories')->where(['slug'=>$slug,'parent_id'=>'0'])->first();
+          //$sub_categories=$category->subcategories;
+          if ($category) 
+          {
+            $categoryIds = getAllCategoryIds($category);
+            $sub_categories=$category->subcategories;
+          }
+          else
+          {
+            $category = Category::with('subcategories')->where(['industry'=>$slug,'parent_id'=>'0'])->get();
+            $sub_categories = collect();
+            foreach($category as $cat)
+            {
+              $categoryIds    = array_merge($categoryIds, getAllCategoryIds($cat));
+              $sub_categories = $sub_categories->merge($cat->subcategories);
+            }
+          }
+          //echo "<pre>";print_r($category);die;
       } 
+      else 
+      {
+          $category = Category::with('subcategories')->where(['slug'=>$slug,'parent_id'=>'0'])->first();
+          $categoryIds = array();
+          if ($category) 
+          {
+            $categoryIds = getAllCategoryIds($category);
+            $sub_categories=$category->subcategories;
+          }
+          else
+          {
+            $category = Category::with('subcategories')->where(['industry'=>$slug,'parent_id'=>'0'])->get();
+            $sub_categories = collect();
+            foreach($category as $cat)
+            {
+              $categoryIds    = array_merge($categoryIds, getAllCategoryIds($cat));
+              $sub_categories = $sub_categories->merge($cat->subcategories);
+            }
+            
+          }
+         // echo "<pre>";print_r($categoryIds);die;
+          $query = Product::with('image')
+          ->whereHas('categories', function ($q) use ($categoryIds) {
+              $q->whereIn('categories.id', $categoryIds);
+          });
+
+        
+      }
+       
+
+      // Build product query
+     
+      $query=$query->where('name', '!=', '');
+          // ✅ Sorting
+          switch ($request->get('sortBy')) {
+              case 'title-ascending':
+                  $query->orderBy('name', 'asc');
+                  break;
+              case 'title-descending':
+                  $query->orderBy('name', 'desc');
+                  break;
+              case 'price-ascending':
+                  $query->orderByRaw('CAST(price AS DECIMAL(10,2)) ASC');
+                  break;
+              case 'price-descending':
+                  $query->orderByRaw('CAST(price AS DECIMAL(10,2)) DESC');
+                  break;
+              case 'created-ascending':
+                  $query->orderBy('created_at', 'asc');
+                  break;
+              case 'created-descending':
+                  $query->orderBy('created_at', 'desc');
+                  break;
+              default:
+                  $query->latest();
+                  break;
+          }
+
+          // ✅ Pagination (keeps page query param)
+          $products = $query->paginate(52)->appends($request->all());
+
+          //echo "<pre>";print_r($products->toArray());die;
+          return response()->json([
+              'category'      => $category,
+              'subcategories' => $sub_categories,
+              'products'      => $products
+          ]);
+
+
+       
+    }
+    public function byIndustry(Request $request, $slug=null, $subcategorySlug = null)
+    { 
+      if (!$slug) 
+      {
+        $query = Product::with('image');
+        $category = Category::where('parent_id','0')->orderBy('name', 'asc')->get();
+        $sub_categories=$category;
+      }
       else 
       {
          $category = Category::with('subcategories')
@@ -149,12 +202,9 @@ class ApiController extends Controller
               'subcategories' => $sub_categories,
               'products'      => $products
           ]);
-
-
-       
     }
 
-    public function byIndustry(Request $request, $industry=null)
+    public function byIndustry1(Request $request, $industry=null)
     {
       //$industry = 'Chemical';
       $category = Category::where('parent_id','0')->orderBy('name', 'asc')->get();

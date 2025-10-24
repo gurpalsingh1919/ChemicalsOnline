@@ -24,7 +24,7 @@ export default function CategoryProductsList() {
     //   ? `/api/collections/${categorySlug}/${subcategorySlug}`
     //   : `/api/collections/${categorySlug}`;
 
-      let url = `/api/collections`;
+      let url = `/api/industry`;
 
      if (categorySlug && subcategorySlug) {
        url += `/${categorySlug}/${subcategorySlug}`;
@@ -58,7 +58,7 @@ export default function CategoryProductsList() {
                
                   {subcategories.map((sub) => (
                      <li key={sub.id}>
-                        <Link to={`/collections/${categorySlug}/${sub.slug}`} title={sub.name}>{sub.name}</Link>
+                        <Link to={`/collections/${category.slug}/${sub.slug}`} title={sub.name}>{sub.name}</Link>
                      </li>
                   ))}
                
