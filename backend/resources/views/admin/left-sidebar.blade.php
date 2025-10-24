@@ -4,7 +4,7 @@
 
         <ul class="navbar-nav theme-brand flex-row  d-none d-lg-flex">
             <li class="nav-item d-flex">
-                <a href="index.html" class="navbar-brand">
+                <a href="{{route('admin.dashboard')}}" class="navbar-brand">
                     <img src="{{asset('img/logo-new-GG_540x.png')}}" class="img-fluid" alt="logo">
                 </a>
 
@@ -17,7 +17,7 @@
 
         <ul class="list-unstyled menu-categories" id="accordionExample">
             <li class="menu">
-                <a href="#" aria-expanded="true" class="dropdown-toggle">
+                <a href="{{route('admin.dashboard')}}" aria-expanded="true" class="dropdown-toggle">
                     <div class="">
                         <i class="flaticon-computer-6 ml-3"></i>
                         <span>Dashboard</span>

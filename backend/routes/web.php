@@ -60,7 +60,7 @@ Route::post('/register', function (Request $request) {
 
 Route::middleware(['auth', 'super_admin'])->prefix('admin')->name('admin.')->group(function () {
         
-    Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
+    Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
     Route::get('/all-users', [AdminController::class, 'allUsers'])->name('all_users');
     Route::resource('categories', CategoryController::class);
     Route::get('/categories/{id}', [CategoryController::class, 'show'])->name('categories.show');
