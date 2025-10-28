@@ -32,6 +32,10 @@ import SeeAllProduct from './pages/SeeAllProduct';
 import Collections from './pages/Collections';
 import ProtectedRoute from './utils/ProtectedRoute';
 import ThankYou from './pages/ThankYou';
+
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 function App() {
   return (
     <Router>
@@ -39,7 +43,10 @@ function App() {
         <Navbar />
         <Breadcrumb />
         <ScrollToTop />
+        <ToastContainer position="top-right" autoClose={2000} />
         <Routes>
+
+
           <Route path="/" element={<Home />} />
 
            {/* All products */}
