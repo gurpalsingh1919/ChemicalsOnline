@@ -42,7 +42,7 @@ return (
 					<h2>Search for products on our site</h2>
                <form onSubmit={handleSearch}>
    					<div className="search-container d-flex searchHeader justify-content-center" id="searchBox">
-                   <input type="text" value={query}  onChange={(e) => setSearchTerm(e.target.value)} className="w-50 mb-0"  placeholder="Search all products..." />
+                   <input type="text" value={searchTerm}  onChange={(e) => setSearchTerm(e.target.value)} className="w-50 mb-0"  placeholder="Search all products..." />
                    <button type="submit" className="search-btn greyBg" id="searchBtn"><i className="fas fa-search"></i></button>
                  </div>
                </form>
