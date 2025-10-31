@@ -13,6 +13,9 @@ use App\Models\OrderDetail;
 use App\Models\ContactUs;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
+use App\Models\Country;
+use App\Models\State;
+use App\Models\Address;
 class ApiController extends Controller
 {
    public function getAllProducts(Request $request)
@@ -264,7 +267,7 @@ class ApiController extends Controller
         'user_id' => 'required|integer',
         'cart' => 'required|array',
         'total' => 'required',
-        'paypal_order_id' => 'required',
+        //'paypal_order_id' => 'required',
       ]);
 
       $order = Order::create([
@@ -272,6 +275,8 @@ class ApiController extends Controller
           'items' => json_encode($request->cart),
           'amount' => $request->total,
           'payment_id' => $request->paypal_order_id,
+          'shipping_address_id' => $request->shipping_address_id,
+          'billing_address_id' => $request->billing_address_id,
           'status' => '1',
       ]);
       $cartdata=$request->cart;
@@ -291,7 +296,7 @@ class ApiController extends Controller
       return response()->json(['success' => true, 'order_id' => $order->id]);
     }
 
-     public function index(Request $request)
+    public function index(Request $request)
     {
         // Fetch all orders belonging to the logged-in user
         $orders = Order::where('user_id', $request->user()->id)
@@ -376,10 +381,54 @@ class ApiController extends Controller
 
     public function orderDetail($id)
     {
-        $order = Order::with(['items.product.image'])->findOrFail($id);
+        $order = Order::with(['billing.country_name','billing.state_name','shipping.country_name','shipping.state_name','items.product.image'])->findOrFail($id);
 
         return response()->json($order);
     }
+     public function countries()
+    {
+        return response()->json(Country::select('id', 'country_name')->orderBy('country_name')->get());
+    }
+
+    public function states($country_id)
+    {
+        return response()->json(State::where('country_id', $country_id)
+            ->select('id', 'name')
+            ->orderBy('name')
+            ->get());
+    }
+    public function getAddresses(Request $request)
+    {
+        $user = $request->user();
+
+        $addresses = Address::where('user_id', $user->id)->get();
+
+        return response()->json($addresses);
+    }
+    public function saveAddresses(Request $request)
+    {
+        $validated = $request->validate([
+            'address_type' => 'required|in:billing,shipping',
+            'first_name' => 'required|string|max:100',
+            'last_name' => 'required|string|max:100',
+            'address' => 'required|string',
+            'city' => 'required|string',
+            'state' => 'required',
+            'pincode' => 'required|string',
+            'country' => 'required',
+        ]);
+
+        $address = Address::updateOrCreate(
+            [
+                'user_id' => $request->user()->id,
+                'apartment'=> $request->apartment,
+                'address_type' => $validated['address_type']
+            ],
+            $validated
+        );
+
+        return response()->json($address);
+}
 
 
 

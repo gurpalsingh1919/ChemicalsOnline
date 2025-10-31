@@ -144,7 +144,7 @@ return (
 								            <thead className="table-dark">
 									            <tr>
 									              <th>Order ID</th>
-									              <th>Items</th>
+									              {/*<th>Items</th>*/}
 									              <th>Date</th>
 									              <th>Status</th>
 									              <th>Amount</th>
@@ -153,8 +153,8 @@ return (
 								            <tbody>
 								             {orders.map((order) => (
 								            	<tr key={order.id} >
-									              <td><Link to ={`/my-orders/${order.id}`}>{order.id}</Link></td>
-									              <td> <ul >
+									              <td><Link to ={`/my-account/${order.id}`}>{order.id}</Link></td>
+									              {/* <td> <ul >
 											            {order.items.map((item) => (
 											              <li key={item.id} className="py-2 flex justify-between">
 											                <span>{item.product?.name || "Product removed"}</span><br/>
@@ -163,7 +163,7 @@ return (
 											                </span>
 											              </li>
 											            ))}
-											          </ul></td>
+											          </ul></td> */}
 									              <td> {new Date(order.created_at).toLocaleString()}</td>
 									              <td>{order.status = 0 ? (
 															        <span>Pending</span>
@@ -179,7 +179,7 @@ return (
 									              <td>${order.amount}</td>
 									              </tr>
 									            ))}
-									            <tr><td colspan="5">No order found !!</td></tr>
+									            {/*<tr><td colspan="5">No order found !!</td></tr>*/}
 								            </tbody>
 								         </table>
 								      </div>

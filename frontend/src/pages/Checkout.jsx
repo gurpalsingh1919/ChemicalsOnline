@@ -1,241 +1,419 @@
 // src/pages/Checkout.jsx
-import React, { useEffect,useState } from "react";
-import { useNavigate,Link } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../utils/AuthContext";
 import { useCart } from "../utils/CartContext";
-import { PayPalButtons,PayPalScriptProvider } from "@paypal/react-paypal-js";
 import axiosInstance from "../axios";
- 
 
 export default function Checkout() {
   const { user, loading } = useAuth();
-  const [setLoading] = useState(true);
-  const { distinctCount,cart, total, clearCart } = useCart();
+  const { distinctCount, cart, total, clearCart } = useCart();
   const navigate = useNavigate();
 
+  const [isPlacingOrder, setIsPlacingOrder] = useState(false);
+  const [countries, setCountries] = useState([]);
+  const [states, setStates] = useState([]);
+  const [sameAsShipping, setSameAsShipping] = useState(false);
+   const [errors, setErrors] = useState({});
+  const handleShippingChange = (e) => {
+    const { name, value } = e.target;
+    setShipping({ ...shipping, [name]: value });
+    setErrors((prev) => ({ ...prev, [name]: "" })); // clear error when typing
+  };
+
+  const handleBillingChange = (e) => {
+    const { name, value } = e.target;
+    setBilling({ ...billing, [name]: value });
+  };
+
+  /** ✅ Validate required shipping fields before placing order */
+  const validateShipping = () => {
+    let newErrors = {};
+
+    if (!shipping.country) newErrors.country = "Country is required";
+    if (!shipping.first_name) newErrors.first_name = "First name is required";
+    if (!shipping.last_name) newErrors.last_name = "Last name is required";
+    if (!shipping.address) newErrors.address = "Address is required";
+    if (!shipping.city) newErrors.city = "City is required";
+    if (!shipping.state) newErrors.state = "State is required";
+    if (!shipping.pincode) newErrors.pincode = "Pincode is required";
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  /** 🧾 Save Address + Place Order */
+  const handlePlaceOrder = async () => {
+    if (!cart.length) return alert("🛒 Your cart is empty!");
+    if (!validateShipping()) return; // stop if validation fails
+
+    setIsPlacingOrder(true);
+    try {
+      // 1️⃣ Save/update addresses first
+      const [shippingRes, billingRes] = await Promise.all([
+        axiosInstance.post("/api/user/save-address", {
+          ...shipping,
+          user_id: user.id,
+          address_type: "shipping",
+        }),
+        axiosInstance.post("/api/user/save-address", {
+          ...billing,
+          user_id: user.id,
+          address_type: "billing",
+        }),
+      ]);
+
+      // 2️⃣ Place order
+      const orderRes = await axiosInstance.post("/api/orders", {
+        user_id: user.id,
+        cart,
+        total,
+        shipping_address_id: shippingRes.data.id,
+        billing_address_id: billingRes.data.id,
+      });
+
+      if (orderRes.data?.order_id) {
+        alert("✅ Order placed successfully!");
+        clearCart();
+        navigate("/thank-you");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("❌ Failed to place order. Try again.");
+    } finally {
+      setIsPlacingOrder(false);
+    }
+  };
+
+  // Address states
+  const [shipping, setShipping] = useState({
+    id: null,
+    country: "",
+    state: "",
+    first_name: "",
+    last_name: "",
+    address: "",
+    apartment: "",
+    city: "",
+    pincode: "",
+  });
+
+  const [billing, setBilling] = useState({
+    id: null,
+    country: "",
+    state: "",
+    first_name: "",
+    last_name: "",
+    address: "",
+    apartment: "",
+    city: "",
+    pincode: "",
+  });
+
+  // Redirect to login if not logged in
   useEffect(() => {
     if (!loading && !user) navigate("/login", { state: { from: "/checkout" } });
   }, [user, loading, navigate]);
 
-  if (loading) return <p>Loading...</p>;
+  
+
+  // Fetch countries
+  useEffect(() => {
+    axiosInstance.get("/api/countries").then((res) => {
+      setCountries(res.data);
+    });
+  }, []);
+
+  // Fetch states dynamically for shipping
+  useEffect(() => {
+    if (shipping.country) {
+      axiosInstance.get(`/api/states/${shipping.country}`).then((res) => {
+        setStates(res.data);
+      });
+    } else {
+      setStates([]);
+    }
+  }, [shipping.country]);
+
+  // Fetch previously saved addresses
+  useEffect(() => {
+    if (user?.id) {
+      axiosInstance
+        .get(`/api/user/addresses/`)
+        .then((res) => {
+          const billingAddr = res.data.find((a) => a.address_type === "billing");
+          const shippingAddr = res.data.find(
+            (a) => a.address_type === "shipping"
+          );
+
+          if (billingAddr) setBilling(billingAddr);
+          if (shippingAddr) setShipping(shippingAddr);
+        })
+        .catch(() => {});
+    }
+  }, [user]);
+
+  // Autofill billing if checked
+  useEffect(() => {
+    if (sameAsShipping) {
+      setBilling({ ...shipping });
+    }
+  }, [sameAsShipping, shipping]);
+
+  
+if (loading) return <p>Loading...</p>;
   if (!user) return null;
 
-  const handlePlaceOrder = () => {
-  	//setLoading(true);
-  	 try {
-			axiosInstance.post('/api/orders-test')
-  	 	const orderdata = {user_id:user.id,cart:cart,total:total,paypal_order_id:"####"};
-  			const res = axiosInstance.post("/api/orders" , orderdata,{ withCredentials: true });
-		       // console.log(res);
-		        if(res.order_id !='')
-		        {
-		        		alert("✅ Order placed successfully!");
-				    	clearCart();
-				    	navigate("/thank-you");
-		        }
-		        
+  return (
+    <section className="contentContainer CheckoutForm">
+      <div className="container">
+        <div className="row">
+          {/* ================= LEFT SIDE: ADDRESS FORM ================= */}
+          <div className="col-lg-7 col-md-6">
+            {/* SHIPPING ADDRESS */}
+            <div className="deliveryInformation">
+              <h2>Shipping Address</h2>
+              <div className="row">
+                <div className="col-md-12">
+                  <label>Country</label>
+                  <select
+                    name="country"
+                    value={shipping.country}
+                    onChange={handleShippingChange}
+                    className={`w-100 ${errors.country ? "is-invalid" : ""}`}
+                  >
+                    <option value="">Select Country</option>
+                    {countries.map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.country_name}
+                      </option>
+                    ))}
+                  </select>
+                  {errors.country && (
+                    <div className="text-danger small">{errors.country}</div>
+                  )}
+                </div>
 
-		      } catch (err) {
-		       
-		      	console.log(err)
-		      } finally {
-		        
-		      }
-  	 	
+                <div className="col-md-6">
+                  <label>First Name</label>
+                  <input
+                    name="first_name"  className={`w-100 ${errors.first_name ? "is-invalid" : ""}`}
+                    value={shipping.first_name}
+                    onChange={handleShippingChange}
+                    placeholder="First Name"
+                  />
+                  {errors.first_name && (
+                    <div className="text-danger small">{errors.first_name}</div>
+                  )}
+                </div>
+                <div className="col-md-6">
+                  <label>Last Name</label>
+                  <input
+                    name="last_name" className={`w-100 ${errors.last_name ? "is-invalid" : ""}`}
+                    value={shipping.last_name}
+                    onChange={handleShippingChange}
+                    placeholder="Last Name"
+                  />
+                  {errors.last_name && (
+                    <div className="text-danger small">{errors.last_name}</div>
+                  )}
+                </div>
 
+                <div className="col-md-12">
+                  <label>Address*</label>
+                  <input
+                    name="address" className={`w-100 ${errors.address ? "is-invalid" : ""}`}
+                    value={shipping.address}
+                    onChange={handleShippingChange}
+                    placeholder="Address"
+                  />
+                  {errors.address && (
+                    <div className="text-danger small">{errors.address}</div>
+                  )}
+                </div>
 
-    
-  };
+                <div className="col-md-12">
+                  <label>Apartment, suite, etc</label>
+                  <input
+                    name="apartment" className="w-100"
+                    value={shipping.apartment}
+                    onChange={handleShippingChange}
+                    placeholder="Apartment"
+                  />
+                </div>
 
-   // ✅ PayPal: Create order with multiple items
-  const createOrder = (data, actions) => {
-    return actions.order.create({
-      purchase_units: [
-        {
-          amount: {
-            currency_code: "USD",
-            value: total.toFixed(2),
-            breakdown: {
-              item_total: {
-                currency_code: "USD",
-                value: total.toFixed(2),
-              },
-            },
-          },
-          items: cart.map((item) => ({
-            name: item.name,
-            unit_amount: {
-              currency_code: "USD",
-              value: item.price.toFixed(2),
-            },
-            quantity: item.quantity.toString(),
-          })),
-        },
-      ],
-    });
-  };
+                <div className="col-md-4">
+                <div className="form-group mb-0">
+                  <label>City</label>
+                  <input
+                    name="city" className={`min-width-auto w-100 ${errors.city ? "is-invalid" : ""}`}
+                    value={shipping.city}
+                    onChange={handleShippingChange}
+                    placeholder="City"
+                  />
+                  {errors.city && (
+                    <div className="text-danger small">{errors.city}</div>
+                  )}
+                </div>
+                </div>
+                <div className="col-md-4">
+                <div className="form-group mb-0">
+                  <label>State</label>
+                  <select
+                    name="state" className={`min-width-auto w-100 ${errors.state ? "is-invalid" : ""}`}
+                    value={shipping.state}
+                    onChange={handleShippingChange}
+                    className="w-100"
+                  >
+                    <option value="">Select State</option>
+                    {states.map((s) => (
+                      <option key={s.id} value={s.id}>
+                        {s.name}
+                      </option>
+                    ))}
+                  </select>
+                  {errors.state && (
+                    <div className="text-danger small">{errors.state}</div>
+                  )}
+                  </div>
+                </div>
 
-  // ✅ When PayPal approves payment
-  const onApprove = (data, actions) => {
-    return actions.order.capture().then((details) => {
-      const paymentData = {
-        order_id: details.id,
-        payer_name: details.payer.name.given_name,
-        payer_email: details.payer.email_address,
-        status: details.status,
-        amount: total,
-      };
+                <div className="col-md-4">
+                <div className="form-group mb-0">
+                  <label>Pin Code</label>
+                  <input type="text"
+                    name="pincode" className={`min-width-auto w-100 ${errors.pincode ? "is-invalid" : ""}`}
+                    value={shipping.pincode}
+                    onChange={handleShippingChange}
+                    placeholder="Pin Code"
+                  />
+                  {errors.pincode && (
+                    <div className="text-danger small">{errors.pincode}</div>
+                  )}
+                  </div>
+                </div>
+              </div>
+            </div>
 
-      // Send order to Laravel backend
-      axiosInstance.post("/api/orders", paymentData, {
-          withCredentials: true,
-        })
-        .then(() => {
-          alert("✅ Payment successful! Order placed.");
-          navigate("/order-success");
-        })
-        .catch((err) => {
-          console.error(err);
-          alert("⚠️ Payment succeeded but order save failed.");
-        });
-    });
-  };
+            {/* BILLING ADDRESS */}
+            <div className="deliveryInformation">
+              <h2>Billing Address</h2>
 
-return (
-   <section className="contentContainer CheckoutForm">
-		<div className="container">
-			<div className="row">
+              <div className="form-check ps-0 d-flex align-items-center">
+                <input
+                  id="sameAsShipping"
+                  type="checkbox"
+                  checked={sameAsShipping}
+                  onChange={(e) => setSameAsShipping(e.target.checked)}
+                />
+                <label className="form-check-label" htmlFor="sameAsShipping">
+                  Same as Shipping
+                </label>
+              </div>
 
-				<div className="col-lg-7 col-md-6">
-					<div className="deliveryInformation">
-						<h2>Shipping Address</h2>
-						<div className="row">
-							<div className="col-md-12">
-								<div className="form-group mb-0">
-									<label htmlFor="Company-name">Country</label>
-									<select className="w-100">
-										<option>Select Country</option>
-										<option>India</option>
-									</select>
-								</div>
-							</div>
-							<div className="col-md-6">
-								<div className="form-group mb-0">
-									<label htmlFor="first-name">First Name</label>
-									<input type="text" className="w-100" id="first-name" placeholder="First Name" value={user.name} aria-describedby="first-name" />
-								</div>
-							</div>
-							<div className="col-md-6">
-								<div className="form-group mb-0">
-									<label htmlFor="last-name">Last Name</label>
-									<input type="text" className="w-100" id="last-name" placeholder="Last Name" aria-describedby="last-name" />
-								</div>
-							</div>
-							<div className="col-md-12">
-								<div className="form-group mb-0">
-									<label htmlFor="address">Address</label>
-									<input type="text" className="w-100" id="address" placeholder="Address" aria-describedby="address" />
-								</div>
-							</div>
-							<div className="col-md-12">
-								<div className="form-group mb-0">
-									<label htmlFor="apartment">Apartment, suit, etc (Optional)</label>
-									<input type="text" className="w-100" id="apartment" placeholder="Apartment, suit, etc (Optional)" aria-describedby="apartment" />
-								</div>
-							</div>
-							<div className="col-md-4">
-								<div className="form-group mb-0">
-									<label htmlFor="city">City</label>
-									<input type="text" className="min-width-auto w-100" id="city" placeholder="City" aria-describedby="city" />
-								</div>
-							</div>
-							<div className="col-md-4">
-								<div className="form-group mb-0">
-									<label htmlFor="state">State</label>
-									<input type="text" className="min-width-auto w-100" id="state" placeholder="State" aria-describedby="state" />
-								</div>
-							</div>
-							<div className="col-md-4">
-								<div className="form-group mb-0">
-									<label htmlFor="pin-code">Pin Code</label>
-									<input type="text" className="min-width-auto w-100" id="pin-code" placeholder="Pin Code" aria-describedby="pin-code" />
-								</div>
-							</div>
-						</div>
-					</div>
+              {!sameAsShipping && (
+                <div className="row">
+                  <div className="col-md-12">
+                    <label>Country</label>
+                    <select
+                      name="country" className="w-100"
+                      value={billing.country}
+                      onChange={handleBillingChange}
+                    >
+                      <option value="">Select Country</option>
+                      {countries.map((c) => (
+                        <option key={c.id} value={c.id}>
+                          {c.country_name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
 
-					<div className="deliveryInformation">
-						<h2>Billing Address</h2>
-						<div className="sameAddress">
-							<div className="form-check ps-0 d-flex align-items-center">
-								<input className="min-width-auto min-height-auto m-0" id="exampleCheck1" type="checkbox" />
-								<label className="form-check-label d-inline-block m-0" htmlFor="exampleCheck1">Same as Shipping address</label>
-							</div>
-						</div>
-						<div className="row">
-							<div className="col-md-12">
-								<div className="form-group mb-0">
-									<label htmlFor="Company-name">Country</label>
-									<select className="w-100">
-										<option>Select Country</option>
-										<option>India</option>
-									</select>
-								</div>
-							</div>
-							<div className="col-md-6">
-								<div className="form-group mb-0">
-									<label htmlFor="first-name">First Name</label>
-									<input type="text" className="w-100" id="first-name" placeholder="First Name" aria-describedby="first-name" />
-								</div>
-							</div>
-							<div className="col-md-6">
-								<div className="form-group mb-0">
-									<label htmlFor="last-name">Last Name</label>
-									<input type="text" className="w-100" id="last-name" placeholder="Last Name" aria-describedby="last-name" />
-								</div>
-							</div>
-							<div className="col-md-12">
-								<div className="form-group mb-0">
-									<label htmlFor="address">Address</label>
-									<input type="text" className="w-100" id="address" placeholder="Address" aria-describedby="address" />
-								</div>
-							</div>
-							<div className="col-md-12">
-								<div className="form-group mb-0">
-									<label htmlFor="apartment">Apartment, suit, etc (Optional)</label>
-									<input type="text" className="w-100" id="apartment" placeholder="Apartment, suit, etc (Optional)" aria-describedby="apartment" />
-								</div>
-							</div>
-							<div className="col-md-4">
-								<div className="form-group mb-0">
-									<label htmlFor="city">City</label>
-									<input type="text" className="min-width-auto w-100" id="city" placeholder="City" aria-describedby="city" />
-								</div>
-							</div>
-							<div className="col-md-4">
-								<div className="form-group mb-0">
-									<label htmlFor="state">State</label>
-									<input type="text" className="min-width-auto w-100" id="state" placeholder="State" aria-describedby="state" />
-								</div>
-							</div>
-							<div className="col-md-4">
-								<div className="form-group mb-0">
-									<label htmlFor="pin-code">Pin Code</label>
-									<input type="text" className="min-width-auto w-100" id="pin-code" placeholder="Pin Code" aria-describedby="pin-code" />
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-				<div className="col-lg-5 col-md-6">
-					<div className="shoppingCartProducts checkoutCart">
-						{cart.length === 0 ? (
-			              <p className="text-center"><b>No items in cart</b></p>
-			            ) : (
-			            <span>
-						{cart.map((item) => (
+                  <div className="col-md-6">
+                    <label>First Name</label>
+                    <input
+                      name="first_name" className="w-100"
+                      value={billing.first_name}
+                      onChange={handleBillingChange}
+                      placeholder="First Name"
+                    />
+                  </div>
 
-						<div className="cart-row" key={item.id}>
+                  <div className="col-md-6">
+                    <label>Last Name</label>
+                    <input
+                      name="last_name" className="w-100"
+                      value={billing.last_name}
+                      onChange={handleBillingChange}
+                      placeholder="Last Name"
+                    />
+                  </div>
+
+                  <div className="col-md-12">
+                    <label>Address</label>
+                    <input
+                      name="address" className="w-100"
+                      value={billing.address}
+                      onChange={handleBillingChange}
+                      placeholder="Address"
+                    />
+                  </div>
+
+                  <div className="col-md-12">
+                    <label>Apartment, suite, etc</label>
+                    <input
+                      name="apartment" className="w-100"
+                      value={billing.apartment}
+                      onChange={handleBillingChange}
+                      placeholder="Apartment"
+                    />
+                  </div>
+
+                  <div className="col-md-4">
+                    <label>City</label>
+                    <input
+                      name="city" className="w-100"
+                      value={billing.city}
+                      onChange={handleBillingChange}
+                      placeholder="City"
+                    />
+                  </div>
+
+                  <div className="col-md-4">
+                    <label>State</label>
+                    <input
+                      name="state" className="w-100"
+                      value={billing.state}
+                      onChange={handleBillingChange}
+                      placeholder="State"
+                    />
+                  </div>
+
+                  <div className="col-md-4">
+                    <label>Pin Code</label>
+                    <input
+                      name="pincode" className="w-100"
+                      value={billing.pincode}
+                      onChange={handleBillingChange}
+                      placeholder="Pin Code"
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* ================= RIGHT SIDE: CART SUMMARY ================= */}
+          <div className="col-lg-5 col-md-6">
+            <div className="shoppingCartProducts checkoutCart">
+              {cart.length === 0 ? (
+                <p className="text-center">
+                  <b>No items in cart</b>
+                </p>
+              ) : (
+                <>
+                  {cart.map((item) => (
+                    <div className="cart-row" key={item.id}>
 							<div className="row">
 								<div className="col-md-8 col-sm-8">
 									<div className="d-flex">
@@ -255,47 +433,25 @@ return (
 								</div>
 							</div>
 						</div>
-							)	)}
-						</span>
-			 			)}
-						{distinctCount > 0 && (
-						<div className="cart-row">
-							<div className="row">
-								<div className="col-md-12 text-end">
-								
-									<div className="totalPrice mb-2">Subtotal <span>${total}</span></div>
-									
-									<div className="btnOuter mt-4">
-					               <button className="btn btn-primary min-width-auto customBtn01 customBtn01Fill fw-semibold"         onClick={handlePlaceOrder} disabled={cart.length === 0}>
-					               	<i className="fas fa-shopping-cart me-2"></i>Place Order
-					               </button>
-
-
-					               {/* PayPal button */}
-								     {/* {cart.length > 0 && (
-							        <PayPalScriptProvider
-							          options={{
-							            "client-id": import.meta.env.VITE_PAYPAL_CLIENT_ID,
-							            currency: "USD",
-							          }}
-							        >
-							          <PayPalButtons
-							            style={{ layout: "vertical" }}
-							            createOrder={createOrder}
-							            onApprove={onApprove}
-							          />
-							        </PayPalScriptProvider>
-							      )}
-										*/}
-					            </div>
-								</div>
-							</div>
-						</div>
-						)}
-					</div>
-				</div>
-			</div>
-		</div>
-   </section>
-);
+                  ))}
+                  <div className="cart-row">
+                  <div className="text-end mt-3">
+                    <div className="totalPrice mb-2">Subtotal <span>${total}</span></div>
+                    <button
+                      className="btn btn-primary mt-3"
+                      onClick={handlePlaceOrder}
+                      disabled={isPlacingOrder}
+                    >
+                      {isPlacingOrder ? "Placing Order..." : "Place Order"}
+                    </button>
+                  </div>
+                  </div>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
 }

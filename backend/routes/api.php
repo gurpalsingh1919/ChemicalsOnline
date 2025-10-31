@@ -25,6 +25,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/my-orders', [ApiController::class, 'index']);
     Route::get('/my-orders/{id}', [ApiController::class, 'orderDetail']);
     Route::post('/change-password', [ApiController::class, 'forgotPassword']);
+    Route::get('/user/addresses', [ApiController::class, 'getAddresses']);
+    Route::post('/user/save-address', [ApiController::class, 'saveAddresses']);
+
+
 });
 
 
@@ -39,6 +43,9 @@ Route::middleware('auth:sanctum')->group(function () {
 // Route::get('/products/search', function () {
 //     return Product::all();
 // });
+Route::get('/countries', [ApiController::class, 'countries']);
+Route::get('/states/{country_id}', [ApiController::class, 'states']);
+
 Route::get('/products/search', [ApiController::class, 'search'])->name('product_search');
 Route::post('/contact', [ApiController::class, 'contactUs']);
 Route::get('products', [ApiController::class, 'getAllProducts'])->name('product_requests');
