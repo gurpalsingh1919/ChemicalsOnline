@@ -75,10 +75,39 @@ export default function OrderDetail() {
 															        <span>Cancel</span>
 															      )}</span>
                   </div>
-                  {/*<div className="col-md-12 mb-2">
-                    <strong>Shipping Address:</strong>
-                    <span className="ms-2">{order.shipping_address}</span>
-                  </div>*/}
+                  <div className="col-md-6 mb-2">
+
+                    <h2>Shipping Address</h2>
+                      {order?.shipping ? (
+                        <div className="address-block">
+                          <p className="mb-1"><b>Name: </b>{order.shipping.first_name} {order.shipping.last_name}</p>
+                          <p className="mb-1"><strong>Address: </strong>{order.shipping.address}</p>
+                          <p className="mb-1"><strong>Apartment: </strong>{order.shipping.apartment}</p>
+                          <p className="mb-1"><strong>City: </strong>{order.shipping.city}</p>
+                          <p className="mb-1"><strong>State: </strong>{order.shipping.state_name.name}</p>
+                          <p className="mb-1"><strong>Country: </strong>{order.shipping.country_name.country_name} </p>
+                          <p className="mb-1"><strong>Pincode: </strong>{order.shipping.pincode}</p>
+                        </div>
+                      ) : (
+                        <p>No Shipping address available</p>
+                      )}
+                  </div>
+                  <div className="col-md-6 mb-2">
+                    <h2>Billing Address</h2>
+                      {order?.billing ? (
+                        <div className="address-block">
+                          <p className="mb-1"><b>Name: </b>{order.billing.first_name} {order.billing.last_name}</p>
+                          <p className="mb-1"><strong>Address: </strong>{order.billing.address}</p>
+                          <p className="mb-1"><strong>Apartment: </strong>{order.billing.apartment}</p>
+                          <p className="mb-1"><strong>City: </strong>{order.billing.city}</p>
+                          <p className="mb-1"><strong>State: </strong>{order.billing.state_name.name}</p>
+                          <p className="mb-1"><strong>Country: </strong>{order.billing.country_name.country_name} </p>
+                          <p className="mb-1"><strong>Pincode: </strong>{order.billing.pincode}</p>
+                        </div>
+                      ) : (
+                        <p>No Billing address available</p>
+                      )}
+                  </div>
                 </div>
               </div>
             </div>
